@@ -71,7 +71,7 @@ if __name__ == "__main__":
     result_graph_nets = graph.query(NetQuery)
     result_graph_nets.serialize(destination=r".\documents\nets.json", format='json-ld', indent=4)
 
-    with open(r"../../../Desktop/documents/nets.json", 'r', encoding="utf8") as f:
+    with open(r".\documents\nets.json", 'r', encoding="utf8") as f:
         nets_dict = json.load(f)
 
     #for net in nets_dict:
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         result_graph_layer = graph.query(layerPerNetQuery)
         result_graph_layer.serialize(destination=r".\documents\layers.json", format='json-ld', indent=4)
 
-        with open(r"../../../Desktop/documents/layers.json", 'r', encoding="utf8") as file:
+        with open(r".\documents\layers.json", 'r', encoding="utf8") as file:
             layers_dict = json.load(file)
 
         size = len(nets_dict[i]["Layers"])
@@ -124,8 +124,10 @@ if __name__ == "__main__":
                         layers_dict[j]["http://www.w3.org/2000/01/rdf-schema#label"][0]["@value"]:
                     nets_dict[i]["Layers"][k]["LayerType"] = \
                     layers_dict[j]["@type"][0]["@value"]
+                    nets_dict[i]["Layers"][k]["sequence"] = \
+                        layers_dict[j]["https://w3id.org/nno/ontology#hasLayerSequence"][0]["@value"]
         nets_dict[i]["Layers"] = sort_dict(nets_dict[i]["Layers"], "sequence")
 
     json_object = json.dumps(nets_dict, indent=4)
-    with open(r".\documents\result .json", "w") as outfile:
+    with open(r".\documents\result.json", "w") as outfile:
        outfile.write(json_object)
