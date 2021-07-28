@@ -40,17 +40,17 @@ def load_data(dataset_name):
     return res_dict
 
 #Create model with Keras Sequential API
-def create_model(given_model, input_shape):
-    lossfunc = inf.get_loss_func(given_model)
-    optimizer = inf.get_optimizer(given_model)
-    layers = inf.get_layers(given_model)
+def create_model(input_shape, learning_rate, dropout, dense_activ):
+    lossfunc = inf.get_loss_func()
+    optimizer = inf.get_optimizer(learning_rate)
+    layers = inf.get_layers()
     metrics = ["accuracy"]
 
     model = keras.Sequential()
     model.add(keras.Input(input_shape))
-    size = len(given_model["Layers"])
+    size = inf.get_layers_numer()
     for i in range(size):
-        model.add(inf.get_layer_type(layers[i]))
+        model.add(inf.get_layer_type(layers[i], dropout, dense_activ))
     model.compile(loss=lossfunc, metrics=metrics, optimizer=optimizer)
     model.summary()
     return model
@@ -71,21 +71,14 @@ if __name__ == '__main__':
         nets_dict = json.load(f)
 
     loaded_dict = load_data("mnist")
-    temp_model = nets_dict[4]
-    #created_model = create_model(temp_model, loaded_dict["input_shape"])
-
-    # print(loaded_dict["x_train"], loaded_dict["y_train"])
-    # history = model.fit(loaded_dict["x_train"], loaded_dict["y_train"], batch_size=64, epochs=2, validation_split=0.2)
-    # test_scores = model.evaluate(loaded_dict["x_test"], loaded_dict["y_test"], verbose=2)
-    # print("Test loss:", test_scores[0])
-    # print("Test accuracy:", test_scores[1])
+    inf.model = nets_dict[5]
 
     #Randomized hyperparameters' search
-    res_model = KerasClassifier(build_fn=lambda: create_model(given_model=temp_model, input_shape=loaded_dict["input_shape"]), verbose=1)
-    param_grid = dict(epochs=params["epochs"], batch_size=params["batches"], validation_split=params["validation_split"])
+    res_model = KerasClassifier(build_fn=create_model, verbose=1)
+    param_grid = dict(epochs=params["epochs"], batch_size=params["batches"], validation_split=params["validation_split"], input_shape=loaded_dict["input_shape"], learning_rate=params["learning_rate"], dropout=params["dropout"], dense_activ=params["activation"])
     grid = RandomizedSearchCV(estimator=res_model, param_distributions=param_grid, scoring="accuracy", verbose=1, n_iter=2)
     print("Tuning is done")
-    grid_result = grid.fit(loaded_dict["x_train"], loaded_dict["y_train"])
+    grid_result = grid.fit(np.argmax(loaded_dict["x_train"], axis=1), np.argmax(loaded_dict["y_train"], axis=1))
     print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
     means = grid_result.cv_results_["mean_test_score"]
     stds = grid_result.cv_results_["std_test_score"]
