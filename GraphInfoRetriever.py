@@ -3,21 +3,11 @@ from rdflib.namespace import Namespace
 from rdflib.plugins.sparql import prepareQuery
 import json
 
-def sort_dict(dict, key):
-    size = len(dict)
-    for i in range(size):
-        for j in range(size):
-            if i == dict[j][key]:
-                temp = dict[i]
-                dict[i] = dict[j]
-                dict[j] = temp
-    return dict
-
 if __name__ == "__main__":
-    ontologyFile = r'.\documents\FAIRnets Dataset.ttl'
+    ontologyFile = r".\documents\FAIRnets Dataset.ttl"
 
     #Load Graph
-    print('Loading Graph')
+    print("Loading Graph")
     graph = rdflib.Graph()
     # Load Ontology
     graph.parse(ontologyFile, format="turtle")
@@ -69,13 +59,13 @@ if __name__ == "__main__":
                 "dc": Namespace("http://purl.org/dc/terms/")})
 
     result_graph_nets = graph.query(NetQuery)
-    result_graph_nets.serialize(destination=r".\documents\nets.json", format='json-ld', indent=4)
+    result_graph_nets.serialize(destination=r".\documents\nets.json", format="json-ld", indent=4)
 
-    with open(r".\documents\nets.json", 'r', encoding="utf8") as f:
+    with open(r".\documents\nets.json", "r", encoding="utf8") as f:
         nets_dict = json.load(f)
 
     #for net in nets_dict:
-    for i in range(3):
+    for i in range(5):
         net_name = nets_dict[i]["@id"]
         lossfunc = nets_dict[i]["https://w3id.org/nno/ontology#hasLossFunction"][0]["@value"]
         optimizer = nets_dict[i]["https://w3id.org/nno/ontology#hasOptimizer"][0]["@value"]
@@ -107,6 +97,7 @@ if __name__ == "__main__":
                 ?layer rdf:type ?type .
                 ?type rdfs:label ?typename.
                 filter(regex(lcase(str(?layer)), "%s" , "i"))
+                filter(!regex(lcase(str(?typename)), "Custom Layer" , "i"))
             }} ORDER BY asc(str(?layerseq))""" % net_name,
             initNs={"nno": Namespace("https://w3id.org/nno/ontology#"),
                     "rdfs": Namespace("http://www.w3.org/2000/01/rdf-schema#")})
@@ -114,7 +105,7 @@ if __name__ == "__main__":
         result_graph_layer = graph.query(layerPerNetQuery)
         result_graph_layer.serialize(destination=r".\documents\layers.json", format='json-ld', indent=4)
 
-        with open(r".\documents\layers.json", 'r', encoding="utf8") as file:
+        with open(r".\documents\layers.json", "r", encoding="utf8") as file:
             layers_dict = json.load(file)
 
         size = len(nets_dict[i]["Layers"])
@@ -126,7 +117,7 @@ if __name__ == "__main__":
                     layers_dict[j]["@type"][0]["@value"]
                     nets_dict[i]["Layers"][k]["sequence"] = \
                         layers_dict[j]["https://w3id.org/nno/ontology#hasLayerSequence"][0]["@value"]
-        nets_dict[i]["Layers"] = sort_dict(nets_dict[i]["Layers"], "sequence")
+        nets_dict[i]["Layers"] = sorted(nets_dict[i]["Layers"], key=lambda key: (key["sequence"]))
 
     json_object = json.dumps(nets_dict, indent=4)
     with open(r".\documents\result.json", "w") as outfile:

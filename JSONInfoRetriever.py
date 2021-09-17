@@ -2,6 +2,10 @@ from tensorflow.keras import layers
 from tensorflow.keras import optimizers
 
 model = None
+model_input_shape = None
+
+def get_input_shape():
+    return model_input_shape
 
 def get_name():
     name = model["Name"]
@@ -51,22 +55,22 @@ def get_layers():
 def get_layers_numer():
     return len(model["Layers"])
 
-def get_layer_type(layer, dropout, dense_activ):
+def get_layer_type(layer, dropout, dense_activ, conv_filter, conv_kernel):
     layer_dict = {
-        "Convolutional 1D Layer": layers.Conv1D(64, (2)),
-        "Convolutional 2D Layer": layers.Conv2D(64, (2)),
-        "Convolutional 3D Layer": layers.Conv3D(64, (2)),
-        "Convolutional 1D Transpose Layer": layers.Conv1DTranspose(64, (2)),
-        "Convolutional 2D Transpose Layer": layers.Conv2DTranspose(64, (2)),
-        "Convolutional 3D Transpose Layer": layers.Conv3DTranspose(64, (2)),
+        "Convolutional 1D Layer": layers.Conv1D(conv_filter, conv_kernel),
+        "Convolutional 2D Layer": layers.Conv2D(conv_filter, conv_kernel),
+        "Convolutional 3D Layer": layers.Conv3D(conv_filter, conv_kernel),
+        "Convolutional 1D Transpose Layer": layers.Conv1DTranspose(conv_filter, conv_kernel),
+        "Convolutional 2D Transpose Layer": layers.Conv2DTranspose(conv_filter, conv_kernel),
+        "Convolutional 3D Transpose Layer": layers.Conv3DTranspose(conv_filter, conv_kernel),
         "Cropping 1D Layer": layers.Cropping1D(),
         "Cropping 2D Layer": layers.Cropping2D(),
         "Cropping 3D Layer": layers.Cropping3D(),
-        "Max Pooling 1D Layer": layers.MaxPool1D((2)),
-        "Max Pooling 2D Layer": layers.MaxPool2D((2)),
-        "Max Pooling 3D Layer": layers.MaxPool2D((2)),
-        "Separable Convolutional 1D Layer": layers.SeparableConv1D(64, (2)),
-        "Separable Convolutional 2D Layer": layers.SeparableConv2D(64, (2)),
+        "Max Pooling 1D Layer": layers.MaxPool1D(conv_kernel),
+        "Max Pooling 2D Layer": layers.MaxPool2D(conv_kernel),
+        "Max Pooling 3D Layer": layers.MaxPool2D(conv_kernel),
+        "Separable Convolutional 1D Layer": layers.SeparableConv1D(conv_filter, conv_kernel),
+        "Separable Convolutional 2D Layer": layers.SeparableConv2D(conv_filter, conv_kernel),
         "UpSampling 1D Layer": layers.UpSampling1D(),
         "UpSampling 2D Layer": layers.UpSampling2D(),
         "UpSampling 3D Layer": layers.UpSampling3D(),
@@ -74,11 +78,11 @@ def get_layer_type(layer, dropout, dense_activ):
         "Zero Padding 2D Layer": layers.ZeroPadding2D(),
         "Zero Padding 3D Layer": layers.ZeroPadding3D(),
         "Dense Layer": layers.Dense(10, activation=dense_activ),
-        "Locally Connected 1D Layer": layers.LocallyConnected1D(64, (2)),
-        "Locally Connected 2D Layer": layers.LocallyConnected2D(64, (2)),
-        "Average Pooling 1D Layer": layers.AveragePooling1D((2)),
-        "Average Pooling 2D Layer": layers.AveragePooling2D((2)),
-        "Average Pooling 3D Layer": layers.AveragePooling3D((2)),
+        "Locally Connected 1D Layer": layers.LocallyConnected1D(conv_filter, conv_kernel),
+        "Locally Connected 2D Layer": layers.LocallyConnected2D(conv_filter, conv_kernel),
+        "Average Pooling 1D Layer": layers.AveragePooling1D(conv_kernel),
+        "Average Pooling 2D Layer": layers.AveragePooling2D(conv_kernel),
+        "Average Pooling 3D Layer": layers.AveragePooling3D(conv_kernel),
         "Global Max Pooling 1D Layer": layers.GlobalMaxPooling1D(),
         "Global Max Pooling 2D Layer": layers.GlobalMaxPooling2D(),
         "Global Max Pooling 3D Layer": layers.GlobalMaxPooling3D(),
